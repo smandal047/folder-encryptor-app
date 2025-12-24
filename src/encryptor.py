@@ -1,5 +1,5 @@
 import os
-from bin.logger import logger as logging
+from src.logger import logger
 
 from cryptography.fernet import Fernet
 
@@ -12,7 +12,7 @@ class FernetEncrypter:
         self.time_key = None
         self.get_key(key_path)
         self.status = {'success': 0, 'fail': 0}
-        self.logger = logging()
+        self.logger = logger(log_name='enCryptor')
 
         self.filter_ascii_char = lambda x: ''.join(e if e.isascii() else '' for e in x )
         
@@ -69,6 +69,7 @@ class FernetEncrypter:
             key = Fernet.generate_key()
 
             # string the key in a file
+            self.logger.warning(f"No Key found, creating one at path:{key_path}")
             with open(key_path, 'wb') as filekey:
                 filekey.write(key)
 
@@ -90,7 +91,7 @@ class FernetEncrypter:
 
                     # encrypts files at root level
                     if code_lvl:
-                        self.logger.info(f"crypting lvl-{encode}: old {file} -> new {new_file}")
+                        self.logger.info(f"crypting lvl_{encode}: old {file} -> new {new_file}")
                         self.file_cryptor(new_file, encode)
 
                     self.status['success'] += 1
@@ -120,4 +121,6 @@ class FernetEncrypter:
 
 if __name__ == '__main__':
     enc = FernetEncrypter('key.k')
-    status = enc.folder_cryptor(r"path", encode=1, code_lvl=0)
+    # status = enc.folder_cryptor(r"path", encode=1, code_lvl=0)
+
+    print(enc.string_cryptor('he', 1))

@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QRadioBu
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
-from bin import FernetEncrypter
-from bin import logger as logging
+from src import FernetEncrypter
+from src import logger
 
 
 class QtEncryptor(QThread):
@@ -15,7 +15,7 @@ class QtEncryptor(QThread):
     def __init__(self, path:str, encode:bool, code_lvl:bool) -> None:
         super().__init__()
         self.path = path
-        self.encode = encode
+        self.encode = encode    
         self.code_lvl = code_lvl
     
     def run(self) -> None:
@@ -34,7 +34,7 @@ class MyWindow(QWidget):
         # self.setGeometry(700, 300, 500, 250)
         self.setFixedSize(500, 250)
 
-        self.logger = logging()
+        self.logger = logger(log_name='pyQTWindow')
         self.path = ''
         self.encode = True
         self.code_lvl = False
@@ -79,13 +79,13 @@ class MyWindow(QWidget):
 
     def add_checkbox(self):
         self.c1 = QCheckBox('Rename Only', self)
-        self.c1.setToolTip('If unchecked, only the file name gets encrypted;\nIf checked, the whole file is encrypted, making it unreadable')
+        self.c1.setToolTip('If checked, only the file name gets encrypted;\nIf unchecked, the whole file is encrypted, making it unreadable')
         self.c1.setChecked(True)
         self.c1.move(300, 150)
         self.c1.toggled.connect(lambda: self.button_state(self.c1)) 
 
     def add_button(self):
-        # buttons
+        # buttons 
         self.button = QPushButton('Start Cryption', self)
         self.button.move(150, 200)
         self.button.clicked.connect(lambda: self.on_click())
@@ -117,7 +117,7 @@ class MyWindow(QWidget):
 
         if self.button.text() == 'Start Cryption':
             
-            self.logger.info(f'Cryption Started, encryption:{self.encode}, codeLvl:{self.code_lvl} for path:{self.t1.text()}')
+            self.logger.info(f'Cryption Started-> encryption:{self.encode}, rename:{not self.code_lvl}, path:{self.t1.text()}')
             self.path = r'{}'.format(self.t1.text())
             
             if os.path.exists(self.path):
@@ -129,6 +129,7 @@ class MyWindow(QWidget):
                 self.encrypt_thread.signal.connect(self.get_encrypt_process)
                 self.encrypt_thread.start()
                 self.button.setText("Kill Task")
+                self.log_text.setText('Running - Check logs')
             else:
                 self.log_text.setText('Incorrect path, Try Again!')
                 self.logger.warning('Incorrect path, Try Again!')
@@ -147,7 +148,7 @@ class MyWindow(QWidget):
         self.log_text.setHidden(False)
 
     def get_encrypt_process(self, status):
-        # run is as separate thread which can be killed via application
+        # binded to pyqtSignal to get success status
 
         self.status = status
         self.logger.info(f'Encryption successfull, Status:{self.status}')
@@ -155,10 +156,8 @@ class MyWindow(QWidget):
         self.on_click()
         
 
-
 # Run the main function if this script is executed
 if __name__ == '__main__':
-# if __name__.endswith('__main__'):
     app = QApplication(sys.argv)  # Create an application instance
     window = MyWindow()           # Create an instance of the window
     window.show()                 # Show the window

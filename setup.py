@@ -4,13 +4,13 @@ from cx_Freeze import setup, Executable
 build_exe_options = {
     "excludes": ["cx-Freeze", "unittest"],
     "zip_include_packages": ["PyQt5.QtWidgets","PyQt5.QtGui","PyQt5.QtCore","cryptography.fernet"],
-    "bin_path_includes": ["bin"]
+    "bin_path_includes": ["src"]
 }
 
 
 setup(
     name="Encryptor",
-    version="0.1",
+    version="1.0",
     description="My GUI application!",
     options={"build_exe": build_exe_options},
     executables=[Executable("gui.py", base="Win32GUI")],
